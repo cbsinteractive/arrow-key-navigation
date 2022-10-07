@@ -2,6 +2,7 @@
 // https://github.com/edenspiekermann/a11y-dialog/blob/cf4ed81/a11y-dialog.js#L6-L18
 export const focusableSelectors: string = 'a[href], area[href], input, select, textarea, ' +
 	'button, iframe, object, embed, [contenteditable], [tabindex], ' +
+	'[role=menuitem], ' +
 	'video[controls], audio[controls], summary';
 
 export const htmlTextInputsArray = [ 
@@ -30,12 +31,13 @@ export function getActiveElement (): Element | null {
 	return activeElement;
 }
 
+// see https://github.com/GoogleChrome/inert-polyfill
 export function isFocusable (element: HTMLElement) {
 	return element.matches(focusableSelectors) &&
-	!(element as any).disabled &&
-	!/^-/.test(element.getAttribute('tabindex') || '') &&
-	!element.hasAttribute('inert') && // see https://github.com/GoogleChrome/inert-polyfill
-	(element.offsetWidth > 0 || element.offsetHeight > 0)
+		!(element as any).disabled &&
+		!/^-/.test(element.getAttribute('tabindex') || '') &&
+		!element.hasAttribute('inert') && 
+		(element.offsetWidth > 0 || element.offsetHeight > 0);
 }
 
 export function isShadowDomPolyfill () {

@@ -1,3 +1,8 @@
-export { KeyManager } from  './KeyManager';
-export { Orientation } from './Orientation';
+import { KeyManager } from  './KeyManager';
+import { Orientation } from './Orientation';
+
+const g = window as any;
+g.KeyManager = KeyManager;
+g.Orientation = Orientation;
+
 

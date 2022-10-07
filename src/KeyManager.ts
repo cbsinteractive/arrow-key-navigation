@@ -12,22 +12,26 @@ interface NodeFilter {
 }
 
 export class KeyManager {
-	
+
 	private focusTrapTest: (element: Element) => boolean;
 	private forwardKey: string;
+	private container: HTMLElement | null;
 
-	constructor(private orientation: Orientation, container: HTMLElement) {
+	constructor(orientation: Orientation, container: HTMLElement) {
+		this.container = container;
 		this.focusTrapTest = (el: Element) => { 
-			return el === container;
+			return el === this.container;
 		};
 
 		this.forwardKey = orientation === Orientation.HORIZONTAL ? KeyConstants.ARROW_RIGHT : KeyConstants.ARROW_DOWN;
-		this.register();
+		
+		this.register(container);
 	}
 
 	destroy() {
 		this.focusTrapTest = () => {return false};
-		this.unregister();
+		this.unregister(this.container);
+		this.container = null;
 	}
 
 	focusNextOrPrevious (event: KeyboardEvent, key: string) {
@@ -202,7 +206,7 @@ export class KeyManager {
 			case 'ArrowLeft':
 			case 'ArrowRight': 
 			case 'ArrowUp': 
-			case 'ArrowDown': 
+			case 'ArrowDown':
 				this.focusNextOrPrevious(event, key);
 				break;
 			
@@ -212,12 +216,12 @@ export class KeyManager {
 		}
 	}
 
-	register () {
-		document.addEventListener('keydown', this.keyListener);
+	register (container) {
+		container.addEventListener('keydown', this.keyListener);
 	}
 
-	unregister () {
-		document.removeEventListener('keydown', this.keyListener);
+	unregister (container) {
+		container.removeEventListener('keydown', this.keyListener);
 	}
 }
 

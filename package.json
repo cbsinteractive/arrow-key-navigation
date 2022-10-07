@@ -1,29 +1,30 @@
 {
-  "name": "arrow-key-navigation",
-  "version": "1.2.0",
-  "description": "Add left/right key navigation to an HTML5 app",
-  "author": "Nolan Lawson <nolan@nolanlawson.com>",
-  "license": "Apache-2.0",
-  "keywords": [
-    "navigation",
-    "accessibility",
-    "a11y",
-    "focus",
-    "dpad",
-    "d-pad",
-    "arrow",
-    "key"
-  ],
-  "scripts": {
-    "build": "webpack"
-  },
-  "devDependencies": {
-    "webpack": "^5.71.0",
-    "webpack-cli": "^4.9.2",
-	"typescript": "^3.9.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cbsinteractive/arrow-key-navigation.git"
-  }
+	"name": "arrow-key-navigation",
+	"version": "1.0.0",
+	"description": "Add left/right key navigation to an HTML5 app",
+	"author": "Paramount; after Nolan Lawson <nolan@nolanlawson.com>",
+	"license": "Apache-2.0",
+	"keywords": [
+		"navigation",
+		"accessibility",
+		"a11y",
+		"focus",
+		"dpad",
+		"d-pad",
+		"arrow",
+		"key"
+	],
+	"scripts": {
+		"build": "webpack"
+	},
+	"devDependencies": {
+        "ts-loader": "^9.2.4",
+        "typescript": "^4.3.5",
+        "webpack": "^5.47.1",
+        "webpack-cli": "^4.7.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cbsinteractive/arrow-key-navigation.git"
+	}
 }
