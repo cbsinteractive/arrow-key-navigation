@@ -1,6 +1,6 @@
 // This query is adapted from a11y-dialog
 // https://github.com/edenspiekermann/a11y-dialog/blob/cf4ed81/a11y-dialog.js#L6-L18
-export const focusableSelectors: string = 'a[href], area[href], input, select, textarea, ' +
+export const defaultFocusableSelectors: string = 'a[href], area[href], input, select, textarea, ' +
 	'button, iframe, object, embed, [contenteditable], [tabindex], ' +
 	'[role=menuitem], ' +
 	'video[controls], audio[controls], summary';
@@ -13,7 +13,12 @@ export const htmlTextInputsArray = [
 	'url'
 ];
 
-export const KeyConstants = {
+export const KeyConstants: {
+	ARROW_LEFT: string;
+	ARROW_DOWN: string;
+	ARROW_UP: string;
+	ARROW_RIGHT: string;
+} = {
 	ARROW_LEFT: 'ArrowLeft',
 	ARROW_DOWN: 'ArrowDown',
 	ARROW_UP: 'ArrowUp',
@@ -32,8 +37,8 @@ export function getActiveElement (): Element | null {
 }
 
 // see https://github.com/GoogleChrome/inert-polyfill
-export function isFocusable (element: HTMLElement) {
-	return element.matches(focusableSelectors) &&
+export function isFocusable (element: HTMLElement, focusableList: string) {
+	return element.matches(focusableList) &&
 		!(element as any).disabled &&
 		!/^-/.test(element.getAttribute('tabindex') || '') &&
 		!element.hasAttribute('inert') && 

@@ -4,45 +4,94 @@
 
 //for NodeFilters, see: https://www.w3.org/TR/DOM-Level-2-Traversal-Range/traversal.html#Traversal-NodeFilter
 
-import { Orientation } from "./Orientation";
-import { checkboxRadioInputTypesArray, getActiveElement, htmlTextInputsArray, isFocusable, isShadowDomPolyfill, KeyConstants } from "./util";
+import { Orientation } from './Orientation';
+import { 
+	checkboxRadioInputTypesArray, 
+	defaultFocusableSelectors,
+	getActiveElement,
+	htmlTextInputsArray,
+	isFocusable,
+	isShadowDomPolyfill,
+	KeyConstants
+} from './util';
+import { closest } from 'kagekiri';
 
 interface NodeFilter {
 	acceptNode: (node: HTMLElement) => number;
 }
 
 export class KeyManager {
-
 	private focusTrapTest: (element: Element) => boolean;
 	private forwardKey: string;
-	private container: HTMLElement | null;
+	private backKey: string;
+	private container: HTMLElement | Document;
+	private focusableSelectors: string | null;
 
-	constructor(orientation: Orientation, container: HTMLElement) {
-		this.container = container;
+	constructor(container: HTMLElement, orientation: Orientation, focusableSelectors?: string) {
+		this.container = container || document;
+		this.focusableSelectors = focusableSelectors || defaultFocusableSelectors;
 		this.focusTrapTest = (el: Element) => { 
 			return el === this.container;
 		};
 
 		this.forwardKey = orientation === Orientation.HORIZONTAL ? KeyConstants.ARROW_RIGHT : KeyConstants.ARROW_DOWN;
+		this.backKey = orientation === Orientation.HORIZONTAL ? KeyConstants.ARROW_LEFT : KeyConstants.ARROW_UP;
 		
 		this.register(container);
 	}
 
 	destroy() {
-		this.focusTrapTest = () => {return false};
 		this.unregister(this.container);
+		this.focusTrapTest = () => {return false};
 		this.container = null;
 	}
 
 	focusNextOrPrevious (event: KeyboardEvent, key: string) {
-		const activeElement = getActiveElement() as HTMLElement;
+		let activeElement = getActiveElement() as HTMLElement;
 		const forwardDirection = this.isForwardKey(key);
 
 		if (activeElement && this.shouldIgnoreEvent(activeElement, forwardDirection)) {
 			return;
 		}
 
-		const root = this.getFocusTrapParent(activeElement) || activeElement.getRootNode();
+		
+		if (!activeElement.matches(this.focusableSelectors)) {
+			const arr = this.focusableSelectors.split(', ');
+			let n = arr.length, i: number;
+
+			for (i = 0; i < n; i++) {
+				const el = closest(arr[i], activeElement);
+
+				// TODO  investigate why getNextNode fails to return node via
+				// 
+				if (el && !el.shadowRoot) {
+					let next = forwardDirection ? el.nextElementSibling : el.previousElementSibling;
+					while(true) {
+						if (next?.matches(arr[i])) {
+							(next as HTMLElement).focus();
+							event.preventDefault();
+							return;
+						}
+						else {
+							next = forwardDirection ? next?.nextElementSibling : next?.previousElementSibling;
+							if (!next) {
+								break;
+							}
+						}
+					}
+				}
+				else if (el)  {
+					activeElement = el as HTMLElement;
+					break;
+				}
+			}
+		}
+
+		if (!activeElement) {
+			return;
+		}
+
+		const root = this.getFocusTrapParent(activeElement) || activeElement.getRootNode() as HTMLElement;
 		const nextNode = this.getNextNode(root as Element, activeElement, forwardDirection) as HTMLElement;
 
 		if (nextNode && nextNode !== activeElement) {
@@ -149,17 +198,17 @@ export class KeyManager {
 	}
 
 	getNextNode (root: Element, targetElement: Element | null, forwardDirection: boolean): Element | undefined {
+		const selectors = this.focusableSelectors;
 		const filter: NodeFilter = {
 			acceptNode: function (node: HTMLElement) {
-				return (node === targetElement || node.shadowRoot || isFocusable(node))
+				return (node === targetElement || node.shadowRoot || isFocusable(node, selectors))
 				? NodeFilter.FILTER_ACCEPT
 				: NodeFilter.FILTER_SKIP
 			}
 		}
 
+		let nextNode: Element | undefined;
 		// TODO: remove this when we don't need to support the Shadow DOM polyfill
-		let nextNode:Element | undefined;
-
 		if (isShadowDomPolyfill() && root instanceof ShadowRoot) {
 			nextNode = this.getNextCandidateNodeForShadowDomPolyfill(root, targetElement, forwardDirection, filter);
 		}
@@ -203,10 +252,8 @@ export class KeyManager {
 		const key = event.key;
 
 		switch (key) {
-			case 'ArrowLeft':
-			case 'ArrowRight': 
-			case 'ArrowUp': 
-			case 'ArrowDown':
+			case this.forwardKey: 
+			case this.backKey:
 				this.focusNextOrPrevious(event, key);
 				break;
 			
@@ -216,11 +263,11 @@ export class KeyManager {
 		}
 	}
 
-	register (container) {
+	register (container: HTMLElement | Document) {
 		container.addEventListener('keydown', this.keyListener);
 	}
 
-	unregister (container) {
+	unregister (container: HTMLElement | Document) {
 		container.removeEventListener('keydown', this.keyListener);
 	}
 }

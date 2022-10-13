@@ -1,8 +1,10 @@
 {
   "include": ["src/index.ts"],
   "exclude": ["node_modules"],
+
   "compilerOptions": {
     "target": "es2020",
-    "module": "esnext"
+    "module": "esnext",
+	"moduleResolution": "node"
   }
 }

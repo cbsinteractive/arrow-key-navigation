@@ -4,8 +4,8 @@ module.exports = {
 	entry: './src/index.ts',
 	mode: 'production',
 	performance: {
-		maxAssetSize: 50000,
-		maxEntrypointSize: 50000,
+		maxAssetSize: 60000,
+		maxEntrypointSize: 60000,
 		hints: "warning"
 	},
 	watch: true,
@@ -13,6 +13,9 @@ module.exports = {
 		aggregateTimeout: 200,
 		poll: 1500,
 		ignored: ['**/_original', '**/js', '**/node_modules', '**/dist', '**/test'],
+	},
+	optimization: {
+		usedExports: true,
 	},
 	module: {
 		rules: [

@@ -11,21 +11,38 @@
 			background-color: #17191A;
 		}
 		.main {
-			width: 300px;
-			height: 300px;
+			width: 304px;
+			height: 304px;
 			margin: 100px auto;
 		}
 		button {
+			box-sizing: border-box;
+			padding: 0;
 			width: 96px;
 			height: 96px;
 			line-height: 96px;
 			background-color: #666;
 			color: #fff;
+			border: none;
+			margin: 1px;
 		}
 
-		*:focus {
+		button.rot {
+			width: 96px;
+			height: 48px;
+			line-height: 48px;
+			color: #fc0;
+			font-size: 20px;
+		}
+
+		.main *:focus {
 			outline: none;
-			box-shadow: inset 0 0 2px 3px #f90;
+			box-shadow: inset 0 0 2px 3px #f0f;
+		}
+
+		.b-comp {
+			width: 96px;
+			margin: 30px auto;
 		}
 	</style>
 
@@ -33,39 +50,56 @@
 </head>
 <body>
 
-	<div class="main" role="menu">
-		<div role="menuitem" tabindex="-1">
+	<div class="main" role="menu" tabindex="-1">
+		<div role="menuitem" data-container-name="top" tabindex="-1">
 			<button>B1</button> <button>B2</button> <button>B3</button>
 		</div>
 
-		<div role="menuitem" tabindex="-1">
+		<div role="menuitem" tabindex="-1" data-container-name="middle" >
 			<button>B4</button> <button>B5</button> <button>B6</button>
 		</div>
 
-		<div role="menuitem" tabindex="-1">
+		<div role="menuitem" tabindex="-1" data-container-name="bottom" >
 			<button>B7</button> <button>B8</button> <button>B9</button>
 		</div>
 	</div>
 
+	<div class="b-comp">
+		<button class="rot" onclick="rotate()">rotate</button>
+	</div>
+
 	<script>
-		const main = document.querySelector('div.main');
-		const items = document.querySelectorAll('div[role=menuitem]');
+		const containerSelector = 'div[role=menuitem]';
+		const mainContainer = document.querySelector('div.main');
+		const controlContainers = mainContainer.querySelectorAll(containerSelector);
 
 		const managers = [];
-		// simulate 'delegatesFocus'
-		Array.from(items).forEach( i => {
-			const m = new KeyManager(Orientation.HORIZONTAL, i);
+		let currentIndex = -1;
+		
+		Array.from(controlContainers).forEach(c => {
+			const m = new KeyManager(c, Orientation.HORIZONTAL);
 			managers.push(m);
 
-			i.addEventListener('focus', (e) => {
-				if (e.target === i) {
-					console.log("focusing my first button...");
-					i.querySelector('button')?.focus();
+			// simulate 'delegatesFocus'
+			c.addEventListener('focus', (e) => {
+				if (e.target === c) {
+					console.log(`%cContainer "${c.dataset.containerName}" focusing first button..., `, 'color: #f90;');
+					c.querySelector('button')?.focus();
 				}
 			});
 		});
-		items[0].focus();
-		//new KeyManager(Orientation.VERTICAL, main);
+
+		new KeyManager(mainContainer, Orientation.VERTICAL, '[role=menuitem]');
+
+		// focus delegation...
+		mainContainer.addEventListener('focus', (e) => {
+			if (e.target === mainContainer) {
+				console.log("Main container (menu) focusing first menu item...");
+				mainContainer.querySelector('[role=menuitem]')?.focus();
+			}
+		});
+
+		mainContainer.focus();
 
 	</script>
 
